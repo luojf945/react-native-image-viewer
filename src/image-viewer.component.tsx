@@ -322,7 +322,9 @@ export default class ImageViewer extends React.Component<Props, State> {
       // 回到之前的位置
       // this.resetPosition.call(this)
       if (this.props.onChangeOut) {
-        this.props.onChangeOut(true)
+       if (!this.props.onChangeOut(true)) {
+        this.resetPosition.call(this)
+       }
       }
       return
     }
@@ -354,10 +356,12 @@ export default class ImageViewer extends React.Component<Props, State> {
   public goNext() {
     if (this.state.currentShowIndex === this.props.imageUrls.length - 1) {
       // 回到之前的位置
-      // this.resetPosition.call(this)
+      this.resetPosition.call(this)
       if (this.props.onChangeOut) {
-        this.props.onChangeOut(false)
-      }
+        if (!this.props.onChangeOut(false)) {
+         this.resetPosition.call(this)
+        }
+       }
       return
     }
 
