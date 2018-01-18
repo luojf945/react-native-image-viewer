@@ -166,6 +166,13 @@ export class Props {
   public onChange?: (index?: number) => void = () => {
     //
   }
+
+  /**
+   * 当图片切换到最后一个或第一个外时触发
+   */
+  public onChangeOut?: (fromRight?: boolean) => boolean = () => {
+    return false
+  }
 }
 
 export class State {
