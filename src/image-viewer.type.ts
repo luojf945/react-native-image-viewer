@@ -228,6 +228,7 @@ export interface IImageInfo {
 }
 
 export interface IImageSize {
+  url: string
   width: number
   height: number
   // 图片加载状态

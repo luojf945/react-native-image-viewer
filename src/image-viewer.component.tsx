@@ -39,7 +39,7 @@ export default class ImageViewer extends React.Component<Props, State> {
   private hasLayout = false
 
   // 记录已加载的图片 index
-  private loadedIndex = new Map<number, boolean>()
+  private loadedUrl = new Map<string, number>()
 
   private handleLongPressWithIndex = new Map<number, any>()
 
@@ -52,6 +52,41 @@ export default class ImageViewer extends React.Component<Props, State> {
       this.setState(
         {
           currentShowIndex: nextProps.index
+        },
+        () => {
+          // 立刻预加载要看的图
+          this.loadImage(nextProps.index || 0)
+
+          this.jumpToCurrentImage()
+
+          // 显示动画
+          Animated.timing(this.fadeAnim, {
+            toValue: 1,
+            duration: 200
+          }).start()
+        }
+      )
+    }
+    if (nextProps.imageUrls !== this.props.imageUrls) {
+      const imageSizes: IImageSize[] = []
+      nextProps.imageUrls.forEach(imageUrl => {
+        var status = 'loading'
+        if (this.loadedUrl.has(imageUrl.url)) {
+          const index = this.loadedUrl[imageUrl.url]
+          status = this.state.imageSizes[index].status
+        }
+        const length = imageSizes.push({
+          url: imageUrl.url || '',
+          width: imageUrl.width || 0,
+          height: imageUrl.height || 0,
+          status
+        })
+        this.loadedUrl[imageUrl.url] = length - 1
+      })
+
+      this.setState(
+        {
+          imageSizes
         },
         () => {
           // 立刻预加载要看的图
@@ -83,6 +118,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     const imageSizes: IImageSize[] = []
     nextProps.imageUrls.forEach(imageUrl => {
       imageSizes.push({
+        url: imageUrl.url || '',
         width: imageUrl.width || 0,
         height: imageUrl.height || 0,
         status: "loading"
@@ -119,6 +155,19 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.positionX.setValue(this.positionXNumber)
   }
 
+  public urlToIndex(url: string) {
+    var index = -1
+    const imageSizes = this!.state!.imageSizes
+    if (imageSizes) {
+      for (let imageSize of imageSizes) {
+        index ++
+        if (imageSizes.url === url) {
+          break
+        }
+      }
+    }
+    return index
+  }
   /**
    * 加载图片
    */
@@ -127,39 +176,36 @@ export default class ImageViewer extends React.Component<Props, State> {
       return
     }
 
-    if (this.loadedIndex.has(index)) {
+    const image = this!.state!.imageSizes![index]
+    const imageStatus = { ...this!.state!.imageSizes![index] }
+
+    if (this.loadedUrl.has(image.url)) {
       return
     }
-    this.loadedIndex.set(index, true)
-
-    const image = this.props.imageUrls[index]
-    const imageStatus = { ...this!.state!.imageSizes![index] }
+    this.loadedUrl.set(image.url, index)
 
     // 保存 imageSize
     const saveImageSize = () => {
       // 如果已经 success 了，就不做处理
-      if (
-        this!.state!.imageSizes![index] &&
-        this!.state!.imageSizes![index].status !== "loading"
-      ) {
+      if ( image && image.status !== "loading") {
         return
       }
-
+      const index = this.urlToIndex(image.url)
+      if (index == -1) {
+        return
+      }
       const imageSizes = this!.state!.imageSizes!.slice()
       imageSizes[index] = imageStatus
       this.setState({ imageSizes })
     }
 
-    if (this!.state!.imageSizes![index].status === "success") {
+    if (image.status === "success") {
       // 已经加载过就不会加载了
       return
     }
 
     // 如果已经有宽高了，直接设置为 success
-    if (
-      this!.state!.imageSizes![index].width > 0 &&
-      this!.state!.imageSizes![index].height > 0
-    ) {
+    if (image.width > 0 && image.height > 0) {
       imageStatus.status = "success"
       saveImageSize()
       return
@@ -323,7 +369,14 @@ export default class ImageViewer extends React.Component<Props, State> {
       // this.resetPosition.call(this)
       if (this.props.onChangeOut) {
        if (!this.props.onChangeOut(true)) {
-        this.resetPosition.call(this)
+          this.resetPosition.call(this)
+       } else {
+          this.positionXNumber = this.standardPositionX + this.width
+          this.standardPositionX = this.positionXNumber
+          Animated.timing(this.positionX, {
+            toValue: this.positionXNumber,
+            duration: 100
+          }).start()
        }
       }
       return
@@ -359,7 +412,14 @@ export default class ImageViewer extends React.Component<Props, State> {
       this.resetPosition.call(this)
       if (this.props.onChangeOut) {
         if (!this.props.onChangeOut(false)) {
-         this.resetPosition.call(this)
+          this.resetPosition.call(this)
+        } else {
+          this.positionXNumber = this.standardPositionX - this.width
+          this.standardPositionX = this.positionXNumber
+          Animated.timing(this.positionX, {
+            toValue: this.positionXNumber,
+            duration: 100
+          }).start()
         }
        }
       return
