@@ -70,18 +70,17 @@ export default class ImageViewer extends React.Component<Props, State> {
     if (nextProps.imageUrls !== this.props.imageUrls) {
       const imageSizes: IImageSize[] = []
       nextProps.imageUrls.forEach(imageUrl => {
-        var status = 'loading'
-        if (this.loadedUrl.has(imageUrl.url)) {
-          const index = this.loadedUrl[imageUrl.url]
-          status = this.state.imageSizes[index].status
+        const index = this.loadedUrl.get(imageUrl.url)
+        if (index) {
+          const length = imageSizes.push({
+            url: imageUrl.url || '',
+            width: imageUrl.width || 0,
+            height: imageUrl.height || 0,
+            status: this!.state!.imageSizes![index]!.status
+          })
+          this.loadedUrl.set(imageUrl.url, length - 1)
         }
-        const length = imageSizes.push({
-          url: imageUrl.url || '',
-          width: imageUrl.width || 0,
-          height: imageUrl.height || 0,
-          status
-        })
-        this.loadedUrl[imageUrl.url] = length - 1
+        
       })
 
       this.setState(
@@ -161,7 +160,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     if (imageSizes) {
       for (let imageSize of imageSizes) {
         index ++
-        if (imageSizes.url === url) {
+        if (imageSize.url === url) {
           break
         }
       }
