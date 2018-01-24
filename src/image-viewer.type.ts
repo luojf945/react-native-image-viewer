@@ -168,9 +168,9 @@ export class Props {
   }
 
   /**
-   * 当图片切换到最后一个或第一个外时触发
+   * 加载更多
    */
-  public onChangeOut?: (fromRight?: boolean) => boolean = () => {
+  public onLoadMore?: (fromRight?: boolean) => boolean = () => {
     return false
   }
 }
@@ -200,6 +200,11 @@ export class State {
    * 是否出现功能菜单
    */
   public isShowMenu?: boolean = false
+
+  /**
+   * 加载更多
+   */
+  public isLoadMore?: boolean = false
 }
 
 export interface IImageInfo {

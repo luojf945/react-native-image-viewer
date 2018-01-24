@@ -85,6 +85,7 @@ export default class ImageViewer extends React.Component<Props, State> {
 
       this.setState(
         {
+          isLoadMore: false,
           imageSizes
         },
         () => {
@@ -366,17 +367,19 @@ export default class ImageViewer extends React.Component<Props, State> {
     if (this.state.currentShowIndex === 0) {
       // 回到之前的位置
       // this.resetPosition.call(this)
-      if (this.props.onChangeOut) {
-       if (!this.props.onChangeOut(true)) {
+      if (this.props.onLoadMore) {
+        if (!this.props.onLoadMore(true)) {
           this.resetPosition.call(this)
-       } else {
+        } else {
           this.positionXNumber = this.standardPositionX + this.width
           this.standardPositionX = this.positionXNumber
           Animated.timing(this.positionX, {
             toValue: this.positionXNumber,
             duration: 100
           }).start()
-       }
+
+          this.setState({isLoadMore: true})
+        }
       }
       return
     }
@@ -409,8 +412,8 @@ export default class ImageViewer extends React.Component<Props, State> {
     if (this.state.currentShowIndex === this.props.imageUrls.length - 1) {
       // 回到之前的位置
       this.resetPosition.call(this)
-      if (this.props.onChangeOut) {
-        if (!this.props.onChangeOut(false)) {
+      if (this.props.onLoadMore) {
+        if (!this.props.onLoadMore(false)) {
           this.resetPosition.call(this)
         } else {
           this.positionXNumber = this.standardPositionX - this.width
@@ -419,8 +422,10 @@ export default class ImageViewer extends React.Component<Props, State> {
             toValue: this.positionXNumber,
             duration: 100
           }).start()
+
+          this.setState({isLoadMore: true})
         }
-       }
+      }
       return
     }
 
@@ -684,6 +689,40 @@ export default class ImageViewer extends React.Component<Props, State> {
     )
   }
 
+  public getLoadMore() {
+    const screenWidth = this.width
+    const screenHeight = this.height
+
+    const Wrapper = ({ children, ...others }: any) => (
+      <ImageZoom
+        cropWidth={this.width}
+        cropHeight={this.height}
+        maxOverflow={this.props.maxOverflow}
+        // horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
+        // responderRelease={this.handleResponderRelease}
+        onClick={this.handleClick}
+        // onDoubleClick={this.handleDoubleClick}
+        {...others}
+      >
+        {children}
+      </ImageZoom>
+    )
+
+    return (
+      <Wrapper
+        style={{
+          ...this.styles.modalContainer,
+          ...this.styles.loadingContainer
+        }}
+        imageWidth={screenWidth}
+        imageHeight={screenHeight}
+      >
+        <View style={this.styles.loadingContainer}>
+          {this!.props!.loadingRender!()}
+        </View>
+      </Wrapper>
+    )
+  }
   /**
    * 保存当前图片到本地相册
    */
@@ -738,7 +777,18 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.setState({ isShowMenu: false })
   }
 
-  public render() {
+  public renderLoadMore() {
+    return (
+      <View
+        onLayout={this.handleLayout}
+        style={{ flex: 1, overflow: "hidden", ...this.props.style }}
+      >
+        {this.getLoadMore()}
+      </View>
+    )
+  }
+
+  public renderContent() {
     let childs: React.ReactElement<any> = null as any
 
     childs = (
@@ -756,5 +806,15 @@ export default class ImageViewer extends React.Component<Props, State> {
         {childs}
       </View>
     )
+  }
+
+  public render() {
+    const { isLoadMore } = this.state
+
+    if (isLoadMore) {
+      return this.renderLoadMore()
+    }
+
+    return this.renderContent()
   }
 }
