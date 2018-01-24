@@ -541,7 +541,7 @@ export default class ImageViewer extends React.Component<Props, State> {
         this!.state!.imageSizes![index] && this!.state!.imageSizes![index].width
       let height =
         this.state.imageSizes![index] && this.state.imageSizes![index].height
-      const imageInfo = this.state.imageSizes![index]
+      const imageInfo = this.state.imageSizes![index] || {}
 
       // 如果宽大于屏幕宽度,整体缩放到宽度是屏幕宽度
       if (width > screenWidth) {
