@@ -83,6 +83,7 @@ export default class ImageViewer extends React.Component<Props, State> {
             height: this!.state!.imageSizes![index]!.height || 0,
             status: this!.state!.imageSizes![index]!.status
           })
+          this.loadedUrl.set(imageUrl.url, length - 1)
         } else {
           length = imageSizes.push({
             url: imageUrl.url || '',
@@ -91,7 +92,6 @@ export default class ImageViewer extends React.Component<Props, State> {
             status: 'loading'
           })
         }
-        this.loadedUrl.set(imageUrl.url, length - 1)
       })
       console.log('componentWillReceiveProps', imageSizes)
       this.setState(
