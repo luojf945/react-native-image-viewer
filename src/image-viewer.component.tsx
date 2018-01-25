@@ -75,16 +75,23 @@ export default class ImageViewer extends React.Component<Props, State> {
       nextProps.imageUrls.forEach(imageUrl => {
         const index = this.loadedUrl.get(imageUrl.url)
         console.log('componentWillReceiveProps', imageUrl, index)
+        var length = 1
         if (index !== undefined) {
-          const length = imageSizes.push({
+          length = imageSizes.push({
+            url: imageUrl.url || '',
+            width: this!.state!.imageSizes![index]!.width || 0,
+            height: this!.state!.imageSizes![index]!.height || 0,
+            status: this!.state!.imageSizes![index]!.status
+          })
+        } else {
+          length = imageSizes.push({
             url: imageUrl.url || '',
             width: imageUrl.width || 0,
             height: imageUrl.height || 0,
-            status: this!.state!.imageSizes![index]!.status
+            status: 'loading'
           })
-          this.loadedUrl.set(imageUrl.url, length - 1)
         }
-        
+        this.loadedUrl.set(imageUrl.url, length - 1)
       })
       console.log('componentWillReceiveProps', imageSizes)
       this.setState(
