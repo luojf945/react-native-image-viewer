@@ -74,7 +74,8 @@ export default class ImageViewer extends React.Component<Props, State> {
       const imageSizes: IImageSize[] = []
       nextProps.imageUrls.forEach(imageUrl => {
         const index = this.loadedUrl.get(imageUrl.url)
-        if (index) {
+        console.log('componentWillReceiveProps', imageUrl, index)
+        if (index !== undefined) {
           const length = imageSizes.push({
             url: imageUrl.url || '',
             width: imageUrl.width || 0,
