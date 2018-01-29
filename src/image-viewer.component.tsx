@@ -589,7 +589,7 @@ export default class ImageViewer extends React.Component<Props, State> {
           {children}
         </ImageZoom>
       )
-
+      console.log('imageInfo.status', imageInfo.status)
       switch (imageInfo.status) {
         case "loading":
           return (
