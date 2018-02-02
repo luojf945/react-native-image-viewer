@@ -195,7 +195,6 @@ export default class ImageViewer extends React.Component<Props, State> {
       return
     }
     this.loadedUrl.set(image.url, index)
-
     // 保存 imageSize
     const saveImageSize = () => {
       // 如果已经 success 了，就不做处理
@@ -319,7 +318,7 @@ export default class ImageViewer extends React.Component<Props, State> {
   public handleHorizontalOuterRangeOffset = (offsetX: number) => {
     this.positionXNumber = this.standardPositionX + offsetX
     this.positionX.setValue(this.positionXNumber)
-
+    console.log('handleHorizontalOuterRangeOffset', this.positionXNumber)
     if (offsetX < 0) {
       if (
         this!.state!.currentShowIndex ||
@@ -338,6 +337,7 @@ export default class ImageViewer extends React.Component<Props, State> {
    * 手势结束，但是没有取消浏览大图
    */
   public handleResponderRelease = (vx: number) => {
+    console.log('handleResponderRelease', vx)
     if (vx > 0.7) {
       // 上一张
       this.goBack.call(this)
@@ -376,6 +376,7 @@ export default class ImageViewer extends React.Component<Props, State> {
    * 到上一张
    */
   public goBack = () => {
+    console.log('goBack')
     if (this.state.currentShowIndex === 0) {
       // 回到之前的位置
       // this.resetPosition.call(this)
@@ -421,6 +422,7 @@ export default class ImageViewer extends React.Component<Props, State> {
    * 到下一张
    */
   public goNext() {
+    console.log('goNext')
     if (this.state.currentShowIndex === this.props.imageUrls.length - 1) {
       // 回到之前的位置
       this.resetPosition.call(this)
@@ -576,7 +578,7 @@ export default class ImageViewer extends React.Component<Props, State> {
 
       const Wrapper = ({ children, ...others }: any) => (
         <ImageZoom
-          key={index}
+          // key={index}
           cropWidth={this.width}
           cropHeight={this.height}
           maxOverflow={this.props.maxOverflow}
@@ -610,7 +612,19 @@ export default class ImageViewer extends React.Component<Props, State> {
           )
         case "success":
           return (
-            <Wrapper key={index} imageWidth={width} imageHeight={height}>
+            <ImageZoom
+              key={index}
+              cropWidth={this.width}
+              cropHeight={this.height}
+              maxOverflow={this.props.maxOverflow}
+              horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
+              responderRelease={this.handleResponderRelease}
+              onLongPress={this.handleLongPressWithIndex.get(index)}
+              onClick={this.handleClick}
+              onDoubleClick={this.handleDoubleClick}
+              imageWidth={width}
+              imageHeight={height}
+              >
               <Image
                 style={{
                   ...this.styles.imageStyle,
@@ -619,7 +633,7 @@ export default class ImageViewer extends React.Component<Props, State> {
                 }}
                 source={{ uri: image.url }}
               />
-            </Wrapper>
+            </ImageZoom>
           )
         case "fail":
           return (
